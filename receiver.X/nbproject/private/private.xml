@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-private xmlns="http://www.netbeans.org/ns/project-private/1">
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
+    <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
+        <group>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/adc.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/pm.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/main.c</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/gclk.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/saml21e16b.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/mclk.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/supc.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/CMSIS/CMSIS/Core/Include/cmsis_gcc.h</file>
+        </group>
+    </open-files>
+</project-private>
