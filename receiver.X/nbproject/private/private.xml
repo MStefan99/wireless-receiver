@@ -6,6 +6,7 @@
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/lib/usb.h</file>
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/main.cpp</file>
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/lib/usb.cpp</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/usb.h</file>
         </group>
     </open-files>
 </project-private>

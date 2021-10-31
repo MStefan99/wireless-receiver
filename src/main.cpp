@@ -56,6 +56,63 @@ usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
 	.bNumConfigurations = 1
 };
 
+
+usb::usb_descriptor_endpoint endpoint1 = {
+	.bLength = 7,
+	.bDescriptorType = 0x05,
+	.bEndpointAddress = 0x01,
+	.bmAttributes = 0x3,
+	.wMaxPacketSize = 8,
+	.bInterval = 255
+};
+
+
+usb::usb_descriptor_interface interface0 = {
+	.bLength = 9,
+	.bDescriptorType = 0x04,
+	.bInterfaceNumber = 0,
+	.bAlternateSetting = 0,
+	.bNumEndpoints = 1,
+	.bInterfaceClass = 0x02,
+	.bInterfaceSubclass = 0x02,
+	.bInterfaceProtocol = 0,
+	.iInterface = 0,
+	.ENDPOINT = {endpoint1}
+};
+
+
+usb::usb_descriptor_configuration usb::DESCRIPTOR_CONFIGURATION[] = {
+	{
+		.bLength = 9,
+		.bDescritptorType = 0x02,
+		.wTotalLength = 25,
+		.bNumInterfaces = 1,
+		.bConfigurationValue = 1,
+		.iConfiguration = 0,
+		.bmAttributes = 0x80,
+		.bMaxPower = 75,
+		.INTERFACE =
+		{interface0}
+	}
+};
+
+
+usb::usb_descriptor_configuration TEST[] = {
+	{
+		.bLength = 9,
+		.bDescritptorType = 0x02,
+		.wTotalLength = 25,
+		.bNumInterfaces = 1,
+		.bConfigurationValue = 1,
+		.iConfiguration = 0,
+		.bmAttributes = 0x80,
+		.bMaxPower = 75,
+		.INTERFACE =
+		{interface0}
+	}
+};
+
+
 /* Clock distribution
  * 
  * OSC16M @ 8MHz
@@ -77,7 +134,7 @@ usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
 
 
 int main() {
-	uint32_t calibration = *((uint32_t*) 0x00806020);
+	uint32_t calibration = *((uint32_t*)0x00806020);
 
 	// PM config
 	PM_REGS->PM_PLCFG = PM_PLCFG_PLSEL_PL2; // Enter PL2
@@ -85,7 +142,7 @@ int main() {
 
 	// OSCCTRL config
 	OSCCTRL_REGS->OSCCTRL_OSC16MCTRL = OSCCTRL_OSC16MCTRL_ENABLE(1) // Enable OSC16M
-					| OSCCTRL_OSC16MCTRL_FSEL_8; // Set frequency to 8MHz
+					| OSCCTRL_OSC16MCTRL_FSEL_16; // Set frequency to 8MHz
 	OSCCTRL_REGS->OSCCTRL_DFLLVAL = OSCCTRL_DFLLVAL_COARSE((calibration >> 26u) & 0x3f)
 					| OSCCTRL_DFLLVAL_FINE(128); // Load calibration value
 	OSCCTRL_REGS->OSCCTRL_DFLLCTRL = OSCCTRL_DFLLCTRL_ENABLE(1) // Enable DFLL48M
@@ -130,7 +187,7 @@ int main() {
 	PORT_REGS->GROUP[0].PORT_PMUX[12] = PORT_PMUX_PMUXE_G // Mux pin 24 to USB
 					| PORT_PMUX_PMUXO_G; // Mux pin 25 to USB
 	PORT_REGS->GROUP[0].PORT_DIRSET = 0x3 | 0x1 << 16u;
-	
+
 	// USB config
 	usb::init();
 

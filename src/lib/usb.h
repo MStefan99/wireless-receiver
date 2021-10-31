@@ -29,15 +29,13 @@ namespace usb {
 	} usb_descriptor_device;
 
 	typedef struct {
-		uint8_t bLength; // 9
-		uint8_t bDescritptorType; // 0x02
-		uint16_t wTotalLength;
-		uint8_t bNumInterfaces;
-		uint8_t bConfigurationValue;
-		uint8_t iConfiguration;
+		uint8_t bLength; // 7
+		uint8_t bDescriptorType; // 0x05
+		uint8_t bEndpointAddress;
 		uint8_t bmAttributes;
-		uint8_t bMaxPower;
-	} usb_descriptor_configuration;
+		uint16_t wMaxPacketSize;
+		uint8_t bInterval;
+	} usb_descriptor_endpoint;
 
 	typedef struct {
 		uint8_t bLength; // 9
@@ -49,16 +47,22 @@ namespace usb {
 		uint8_t bInterfaceSubclass;
 		uint8_t bInterfaceProtocol;
 		uint8_t iInterface;
-	} usb_descriptor_interface;
+		usb_descriptor_endpoint ENDPOINT; // TODO: make dynamic size
+	}
+	usb_descriptor_interface;
 
 	typedef struct {
-		uint8_t bLength; // 7
-		uint8_t bDescriptorType; // 0x05
-		uint8_t bEndpointAddress;
+		uint8_t bLength; // 9
+		uint8_t bDescritptorType; // 0x02
+		uint16_t wTotalLength;
+		uint8_t bNumInterfaces;
+		uint8_t bConfigurationValue;
+		uint8_t iConfiguration;
 		uint8_t bmAttributes;
-		uint8_t wMaxPacketSize;
-		uint8_t bInterval;
-	} usb_descriptor_endpoint;
+		uint8_t bMaxPower;
+		usb_descriptor_interface INTERFACE; // TODO: make dynamic size
+	}
+	usb_descriptor_configuration;
 
 	typedef struct {
 		uint8_t bLength;
@@ -71,15 +75,13 @@ namespace usb {
 		uint8_t bDescriptorType; // 0x03
 		unsigned char* bString;
 	} usb_descriptor_string;
-	
+
 	extern usb_descriptor_device_registers_t EPDESCTBL[];
-	
+
 	extern usb_descriptor_device DESCRIPTOR_DEVICE;
 	extern usb_descriptor_configuration DESCRIPTOR_CONFIGURATION[];
-	extern usb_descriptor_interface DESCRIPTOR_INTERFACE[];
-	extern usb_descriptor_endpoint DESCRIPTOR_ENDPOINT[];
-	extern usb_descriptor_string0 DESCRIPTOR_STRING0;
-	extern usb_descriptor_string DESCRIPTOR_STRING[];
+	//	extern usb_descriptor_string0 DESCRIPTOR_STRING0;
+	//	extern usb_descriptor_string DESCRIPTOR_STRING[];
 
 
 	void init();
