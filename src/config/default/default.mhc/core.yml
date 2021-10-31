@@ -4,6 +4,13 @@ attributes: {id: core}
 children:
 - type: Symbols
   children:
+  - type: Boolean
+    attributes: {id: ADC_INTERRUPT_ENABLE_UPDATE}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: core, value: 'true'}
   - type: Integer
     attributes: {id: BACKUP_CLOCK_FREQUENCY}
     children:
@@ -167,6 +174,20 @@ children:
       children:
       - type: Dynamic
         attributes: {id: core, value: '48000000'}
+  - type: String
+    attributes: {id: NVIC_6_0_HANDLER}
+    children:
+    - type: Values
+      children:
+      - type: User
+        attributes: {value: USB_Handler}
+  - type: Boolean
+    attributes: {id: PM_INTERRUPT_ENABLE_UPDATE}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: core, value: 'true'}
   - type: Boolean
     attributes: {id: PORT_GROUP_0}
     children:
@@ -195,5 +216,12 @@ children:
       children:
       - type: Dynamic
         attributes: {id: core, value: '1000'}
+  - type: Boolean
+    attributes: {id: USB_INTERRUPT_ENABLE_UPDATE}
+    children:
+    - type: Values
+      children:
+      - type: Dynamic
+        attributes: {id: core, value: 'true'}
 - type: ElementPosition
   attributes: {x: '640', y: '19', id: core}
