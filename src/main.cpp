@@ -40,6 +40,9 @@ usb_descriptor_device_registers_t usb::EPDESCTBL[2];
 
 
 usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
+	.bLength = 18,
+	.bDescriptorType = 0x01,
+	.bcdUSB = 0x0200,
 	.bDeviceClass = 0x02,
 	.bDeviceSubclass = 0x02,
 	.bDeviceProtocol = 0x00,
@@ -55,11 +58,11 @@ usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
 
 /* Clock distribution
  * 
- * OSC16M @ 4MHz
+ * OSC16M @ 8MHz
  * |
- * |--> GCLK0 @ 4MHz 
+ * |--> GCLK0 @ 8MHz 
  * |    |
- * |     `-> MCLK @ 4MHz
+ * |     `-> MCLK @ 8MHz
  * |
  *  `-> GCLK1 @ 500KHz
  *      |
@@ -82,7 +85,7 @@ int main() {
 
 	// OSCCTRL config
 	OSCCTRL_REGS->OSCCTRL_OSC16MCTRL = OSCCTRL_OSC16MCTRL_ENABLE(1) // Enable OSC16M
-					| OSCCTRL_OSC16MCTRL_FSEL_12; // Set frequency to 12MHz
+					| OSCCTRL_OSC16MCTRL_FSEL_8; // Set frequency to 8MHz
 	OSCCTRL_REGS->OSCCTRL_DFLLVAL = OSCCTRL_DFLLVAL_COARSE((calibration >> 26u) & 0x3f)
 					| OSCCTRL_DFLLVAL_FINE(128); // Load calibration value
 	OSCCTRL_REGS->OSCCTRL_DFLLCTRL = OSCCTRL_DFLLCTRL_ENABLE(1) // Enable DFLL48M
@@ -126,11 +129,9 @@ int main() {
 	PORT_REGS->GROUP[0].PORT_PINCFG[25] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 25
 	PORT_REGS->GROUP[0].PORT_PMUX[12] = PORT_PMUX_PMUXE_G // Mux pin 24 to USB
 					| PORT_PMUX_PMUXO_G; // Mux pin 25 to USB
-	PORT_REGS->GROUP[0].PORT_PINCFG[16] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 16
-	PORT_REGS->GROUP[0].PORT_PMUX[8] = PORT_PMUX_PMUXE_H; // Mux pin 16 to GCLK
-	PORT_REGS->GROUP[0].PORT_PINCFG[23] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 22
-	PORT_REGS->GROUP[0].PORT_PMUX[11] = PORT_PMUX_PMUXO_G; // Mux pin 22 to USB SOF
+	PORT_REGS->GROUP[0].PORT_DIRSET = 0x3 | 0x1 << 16u;
 	
+	// USB config
 	usb::init();
 
 
