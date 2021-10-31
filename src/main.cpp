@@ -27,6 +27,8 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include "device.h"                     // SYS function prototypes
 
+#include "lib/usb.h"
+
 
 // *****************************************************************************
 // *****************************************************************************
@@ -34,107 +36,10 @@
 // *****************************************************************************
 // *****************************************************************************
 
-enum class USB_DEVICE_REQ {
-	GET_STATUS = 0x00,
-	CLEAR_FEATURE = 0x01,
-	SET_FEATURE = 0x03,
-	SET_ADDRESS = 0x05,
-	GET_DESCRIPTOR = 0x06,
-	SET_DESCRIPTOR = 0x07,
-	GET_CONFIGURATION = 0x08,
-	SET_CONFIGURATION = 0x09
-};
-
-enum class USB_INTERFACE_REQ {
-	GET_STATUS = 0x00,
-	CLEAR_FEATURE = 0x01,
-	SET_FEATURE = 0x03,
-	GET_INTERFACE = 0x0A,
-	SET_INTERFACE = 0x11
-};
-
-enum class USB_EP_REQ {
-	GET_STATUS = 0x00,
-	CLEAR_FEATURE = 0x01,
-	SET_FEATURE = 0x03,
-	SYNCH_FRAME = 0x12
-};
-
-typedef struct {
-	uint8_t bmRequestType;
-	uint8_t bRequest;
-	uint16_t wValue;
-	uint16_t wIndex;
-	uint16_t wLength;
-} usb_device_endpoint0_request;
-
-typedef struct {
-	uint8_t bLength; // 18
-	uint8_t bDescriptorType; // 0x01
-	uint16_t bcdUSB; // 0x0210
-	uint8_t bDeviceClass;
-	uint8_t bDeviceSubclass;
-	uint8_t bDeviceProtocol;
-	uint8_t bMaxPacketSize;
-	uint16_t idVendor;
-	uint16_t idProduct;
-	uint16_t bcdDevice;
-	uint8_t iManufacturer;
-	uint8_t iProduct;
-	uint8_t iSerialNumber;
-	uint8_t bNumConfigurations;
-} usb_device_device_descriptor;
-
-typedef struct {
-	uint8_t bLength; // 9
-	uint8_t bDescritptorType; // 0x02
-	uint16_t wTotalLength;
-	uint8_t bNumInterfaces;
-	uint8_t bConfigurationValue;
-	uint8_t iConfiguration;
-	uint8_t bmAttributes;
-	uint8_t bMaxPower;
-} usb_device_configuration_descriptor;
-
-typedef struct {
-	uint8_t bLength; // 9
-	uint8_t bDescriptorType; // 0x04
-	uint8_t bInterfaceNumber;
-	uint8_t bAlternateSetting;
-	uint8_t bNumEndpoints;
-	uint8_t bInterfaceClass;
-	uint8_t bInterfaceSubclass;
-	uint8_t bInterfaceProtocol;
-	uint8_t iInterface;
-} usb_device_interface_descriptor;
-
-typedef struct {
-	uint8_t bLength; // 7
-	uint8_t bDescriptorType; // 0x05
-	uint8_t bEndpointAddress;
-	uint8_t bmAttributes;
-	uint8_t wMaxPacketSize;
-	uint8_t bInterval;
-} usb_device_endpoint_descriptor;
-
-typedef struct {
-	uint8_t bLength;
-	uint8_t bDescriptorType; // 0x03
-	uint8_t wLANGID[];
-} usb_device_string0_descriptor;
-
-typedef struct {
-	uint8_t bLength;
-	uint8_t bDescriptorType; // 0x03
-	unsigned char* bString;
-} usb_device_string_descriptor;
+usb_descriptor_device_registers_t usb::EPDESCTBL[2];
 
 
-usb_device_endpoint0_request EP0REQ;
-usb_descriptor_device_registers_t EP0DESC;
-
-
-usb_device_device_descriptor DEVICE_DESC = {
+usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
 	.bDeviceClass = 0x02,
 	.bDeviceSubclass = 0x02,
 	.bDeviceProtocol = 0x00,
@@ -167,21 +72,6 @@ usb_device_device_descriptor DEVICE_DESC = {
  *       `-> GCLK_USB @ 48MHz
  */
 
-
-void USB_Handler() {
-	if (USB_REGS->DEVICE.USB_INTFLAG & USB_DEVICE_INTFLAG_EORST_Msk) {
-		USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPINTENSET = USB_DEVICE_EPINTENSET_RXSTP(1); // Enable endpoint interrupt
-		EP0DESC.DEVICE_DESC_BANK[1].USB_ADDR = (uint32_t) & DEVICE_DESC;
-		EP0DESC.DEVICE_DESC_BANK[0].USB_ADDR = (uint32_t) & EP0REQ;
-		EP0DESC.DEVICE_DESC_BANK[0].USB_PCKSIZE = USB_DEVICE_PCKSIZE_BYTE_COUNT(8);
-	}
-
-	if (USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPINTFLAG & USB_DEVICE_EPINTFLAG_RXSTP_Msk) {
-		EP0DESC.DEVICE_DESC_BANK[1].USB_PCKSIZE = USB_DEVICE_PCKSIZE_BYTE_COUNT(18);
-		USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPSTATUSSET = USB_DEVICE_EPSTATUS_BK1RDY(1);
-		USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPSTATUSCLR = USB_DEVICE_EPSTATUS_BK0RDY(1);
-	}
-}
 
 int main() {
 	uint32_t calibration = *((uint32_t*) 0x00806020);
@@ -240,18 +130,8 @@ int main() {
 	PORT_REGS->GROUP[0].PORT_PMUX[8] = PORT_PMUX_PMUXE_H; // Mux pin 16 to GCLK
 	PORT_REGS->GROUP[0].PORT_PINCFG[23] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 22
 	PORT_REGS->GROUP[0].PORT_PMUX[11] = PORT_PMUX_PMUXO_G; // Mux pin 22 to USB SOF
-
-	// USB config
-	USB_REGS->DEVICE.USB_PADCAL = USB_PADCAL_TRANSN(calibration >> 13u & 0x1f)
-					| USB_PADCAL_TRANSP(calibration >> 18u & 0x1f)
-					| USB_PADCAL_TRIM(calibration >> 23u & 0x7); // USB pad calibration
-	USB_REGS->DEVICE.USB_CTRLA = USB_CTRLA_ENABLE(1) // Enable USB
-					| USB_CTRLA_MODE_DEVICE; // Enable in device mode
-	USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPCFG = USB_DEVICE_EPCFG_EPTYPE0(0x1) // Configure endpoint 0 as setup out
-					| USB_DEVICE_EPCFG_EPTYPE1(0x1); // Configure endpoint 0 as setup in
-	USB_REGS->DEVICE.USB_DESCADD = (uint32_t) & EP0DESC;
-	USB_REGS->DEVICE.USB_CTRLB = USB_DEVICE_CTRLB_DETACH(0); // Attach to host
-	USB_REGS->DEVICE.USB_INTENSET = USB_DEVICE_INTENSET_EORST(1); // Enable end-of-reset interrupt
+	
+	usb::init();
 
 
 	while (true) {

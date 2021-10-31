@@ -34,6 +34,9 @@
           <itemPath>../src/config/default/device.h</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <logicalFolder name="f3" displayName="lib" projectFiles="true">
+        <itemPath>../src/lib/usb.h</itemPath>
+      </logicalFolder>
       <logicalFolder name="f2" displayName="packs" projectFiles="true">
         <logicalFolder name="f1" displayName="ATSAML21E16B_DFP" projectFiles="true">
           <logicalFolder name="f1" displayName="component" projectFiles="true">
@@ -177,6 +180,9 @@
           <itemPath>../src/config/default/startup_xc32.c</itemPath>
           <itemPath>../src/config/default/libc_syscalls.c</itemPath>
         </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f2" displayName="lib" projectFiles="true">
+        <itemPath>../src/lib/usb.cpp</itemPath>
       </logicalFolder>
       <itemPath>../src/main.cpp</itemPath>
     </logicalFolder>
@@ -1489,6 +1495,8 @@
         <property key="memories.programmemory.ranges" value="0-ffff"/>
         <property key="memories.rww" value="true"/>
         <property key="poweroptions.powerenable" value="false"/>
+        <property key="programmerToGoFilePath"
+                  value="D:/Programming/embedded/flight_computer/receiver/firmware/receiver.X/debug/default/receiver_ptg"/>
         <property key="programmerToGoImageName" value="receiver_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
