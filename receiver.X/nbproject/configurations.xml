@@ -994,7 +994,7 @@
         <property key="periphComp4.gte" value="gt"/>
         <property key="periphComp5.gte" value="gt"/>
         <property key="periphComp6.gte" value="gt"/>
-        <property key="poweroptions.powerenable" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoFilePath"
                   value="D:/Programming/embedded/flight_computer/receiver/firmware/receiver.X/debug/default/receiver_ptg"/>
         <property key="programmerToGoImageName" value="receiver_ptg"/>
@@ -1498,7 +1498,7 @@
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-ffff"/>
         <property key="memories.rww" value="true"/>
-        <property key="poweroptions.powerenable" value="true"/>
+        <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoImageName" value="receiver_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>

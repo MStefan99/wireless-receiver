@@ -8,6 +8,9 @@
 #ifndef USB_H
 #define	USB_H
 
+#include <cstring>
+#include "device.h"
+
 
 namespace usb {
 
@@ -78,6 +81,8 @@ namespace usb {
 
 
 	void init();
+	void write(const uint8_t* data, uint8_t len);
+	void read(uint8_t* data, uint8_t len);
 }
 
 #endif	/* USB_H */
