@@ -43,15 +43,15 @@ usb::usb_descriptor_device usb::DESCRIPTOR_DEVICE = {
 	.bLength = 18,
 	.bDescriptorType = 0x01,
 	.bcdUSB = 0x0200,
-	.bDeviceClass = 0x02,
-	.bDeviceSubclass = 0x02,
+	.bDeviceClass = 0x00,
+	.bDeviceSubclass = 0x00,
 	.bDeviceProtocol = 0x00,
 	.bMaxPacketSize = 8,
 	.idVendor = 0x04d8,
-	.idProduct = 0x0001,
-	.bcdDevice = 0x0001,
-	.iManufacturer = 0,
-	.iProduct = 0,
+	.idProduct = 0x000a,
+	.bcdDevice = 0x0008,
+	.iManufacturer = 1,
+	.iProduct = 2,
 	.iSerialNumber = 0,
 	.bNumConfigurations = 1
 };
@@ -67,17 +67,28 @@ usb::usb_descriptor_endpoint endpoint1 = {
 };
 
 
+usb::usb_descriptor_endpoint endpoint2 = {
+	.bLength = 7,
+	.bDescriptorType = 0x05,
+	.bEndpointAddress = 0x81,
+	.bmAttributes = 0x3,
+	.wMaxPacketSize = 8,
+	.bInterval = 255
+};
+
+
 usb::usb_descriptor_interface interface0 = {
 	.bLength = 9,
 	.bDescriptorType = 0x04,
 	.bInterfaceNumber = 0,
 	.bAlternateSetting = 0,
-	.bNumEndpoints = 1,
-	.bInterfaceClass = 0x02,
-	.bInterfaceSubclass = 0x02,
+	.bNumEndpoints = 2,
+	.bInterfaceClass = 0xff,
+	.bInterfaceSubclass = 0xff,
 	.bInterfaceProtocol = 0,
 	.iInterface = 0,
-	.ENDPOINT = {endpoint1}
+	.ENDPOINTS =
+	{endpoint1, endpoint2}
 };
 
 
@@ -85,30 +96,36 @@ usb::usb_descriptor_configuration usb::DESCRIPTOR_CONFIGURATION[] = {
 	{
 		.bLength = 9,
 		.bDescritptorType = 0x02,
-		.wTotalLength = 25,
+		.wTotalLength = 32,
 		.bNumInterfaces = 1,
 		.bConfigurationValue = 1,
 		.iConfiguration = 0,
 		.bmAttributes = 0x80,
 		.bMaxPower = 75,
-		.INTERFACE =
+		.INTERFACES =
 		{interface0}
 	}
 };
 
 
-usb::usb_descriptor_configuration TEST[] = {
+usb::usb_descriptor_string usb::DESCRIPTOR_STRING[] = {
 	{
-		.bLength = 9,
-		.bDescritptorType = 0x02,
-		.wTotalLength = 25,
-		.bNumInterfaces = 1,
-		.bConfigurationValue = 1,
-		.iConfiguration = 0,
-		.bmAttributes = 0x80,
-		.bMaxPower = 75,
-		.INTERFACE =
-		{interface0}
+		.bLength = 4,
+		.bDescriptorType = 0x03,
+		.bString =
+		{
+			0x0409
+		}
+	},
+	{
+		50,
+		0x03,
+		u"Mishanya Technology Inc."
+	},
+	{
+		58,
+		0x03,
+		u"Sub-GHz Wireless transceiver"
 	}
 };
 
@@ -142,9 +159,9 @@ int main() {
 
 	// OSCCTRL config
 	OSCCTRL_REGS->OSCCTRL_OSC16MCTRL = OSCCTRL_OSC16MCTRL_ENABLE(1) // Enable OSC16M
-					| OSCCTRL_OSC16MCTRL_FSEL_16; // Set frequency to 8MHz
+					| OSCCTRL_OSC16MCTRL_FSEL_8; // Set frequency to 8MHz
 	OSCCTRL_REGS->OSCCTRL_DFLLVAL = OSCCTRL_DFLLVAL_COARSE((calibration >> 26u) & 0x3f)
-					| OSCCTRL_DFLLVAL_FINE(128); // Load calibration value
+					| OSCCTRL_DFLLVAL_FINE(108); // Load calibration value
 	OSCCTRL_REGS->OSCCTRL_DFLLCTRL = OSCCTRL_DFLLCTRL_ENABLE(1) // Enable DFLL48M
 					| OSCCTRL_DFLLCTRL_MODE(0); // Run in open-loop mode
 
@@ -181,12 +198,13 @@ int main() {
 	//ADC_REGS->ADC_CTRLA = ADC_CTRLA_ENABLE(1);  // Enable ADC
 
 	// PORT config
-	PORT_REGS->GROUP[0].PORT_DIRSET = 0x3;
+	PORT_REGS->GROUP[0].PORT_DIRSET = 0x3 | 0x1 << 16u;
 	PORT_REGS->GROUP[0].PORT_PINCFG[24] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 24
 	PORT_REGS->GROUP[0].PORT_PINCFG[25] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 25
 	PORT_REGS->GROUP[0].PORT_PMUX[12] = PORT_PMUX_PMUXE_G // Mux pin 24 to USB
 					| PORT_PMUX_PMUXO_G; // Mux pin 25 to USB
-	PORT_REGS->GROUP[0].PORT_DIRSET = 0x3 | 0x1 << 16u;
+	//PORT_REGS->GROUP[0].PORT_PINCFG[16] = PORT_PINCFG_PMUXEN(1); // Enable mux on pin 16
+	//PORT_REGS->GROUP[0].PORT_PMUX[8] = PORT_PMUX_PMUXE_H; // Mux pin 16 to GCLK
 
 	// USB config
 	usb::init();
