@@ -3,8 +3,10 @@
 using namespace usb;
 
 
-static void USBControlHandler();
+static void controlHandler();
 static void deviceRequestHandler();
+static void enableEndpoints(uint8_t configurationNumber);
+static void endpoint1Handler();
 
 
 #define MIN(a, b) ((a < b)? (a) : (b))
@@ -85,20 +87,21 @@ extern "C" {
 
 	void USB_Handler() {
 		if (USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPINTFLAG) {
-			USBControlHandler();
+			controlHandler();
+		}
+		if (USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTFLAG) {
+			endpoint1Handler();
 		}
 	}
 }
 
 
-static void USBControlHandler() {
+static void controlHandler() {
 	if (USB_REGS->DEVICE.USB_INTFLAG & USB_DEVICE_INTFLAG_EORST_Msk) { // Process USB reset
 		USB_REGS->DEVICE.USB_INTFLAG = USB_DEVICE_INTFLAG_EORST(1); // Clear pending interrupt
 		USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPINTENSET = USB_DEVICE_EPINTENSET_RXSTP(1) // Enable endpoint interrupt
 						| USB_DEVICE_EPINTENSET_TRCPT0(1) // Enable OUT endpoint interrupt
 						| USB_DEVICE_EPINTENSET_TRCPT1(1); // Enable IN endpoint interrupt
-		USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPCFG = USB_DEVICE_EPCFG_EPTYPE0(0x3) // Configure endpoint 1 as bulk out
-						| USB_DEVICE_EPCFG_EPTYPE1(0x3); // Configure endpoint 1 as bulk in
 		EPDESCTBL[0].DEVICE_DESC_BANK[0].USB_ADDR = (uint32_t) & EP0REQ;
 		EPDESCTBL[1].DEVICE_DESC_BANK[0].USB_ADDR = (uint32_t) & outBuf1;
 	}
@@ -169,8 +172,36 @@ static void deviceRequestHandler() {
 			break;
 		case (uint8_t)DEVICE_REQ::SET_CONFIGURATION:
 			EPDESCTBL[0].DEVICE_DESC_BANK[1].USB_PCKSIZE = USB_DEVICE_PCKSIZE_AUTO_ZLP(1);
+			enableEndpoints(EP0REQ.wValue);
 			break;
 	}
+}
+
+
+static void enableEndpoints(uint8_t configurationNumber) {
+	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPCFG = USB_DEVICE_EPCFG_EPTYPE0(0x3) // Configure endpoint 1 as bulk out
+					| USB_DEVICE_EPCFG_EPTYPE1(0x3); // Configure endpoint 1 as bulk in
+	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTENSET = USB_DEVICE_EPINTENSET_TRCPT0(1)
+					| USB_DEVICE_EPINTENSET_TRCPT1(1);
+	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSSET = USB_DEVICE_EPSTATUS_STALLRQ0(1)
+					| USB_DEVICE_EPSTATUS_STALLRQ1(1);
+}
+
+
+static void endpoint1Handler() {
+	PORT_REGS->GROUP[0].PORT_OUTSET = 0x1 << 16u;
+
+	if (USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTFLAG & USB_DEVICE_EPINTFLAG_TRCPT0_Msk) {
+		USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTFLAG = USB_DEVICE_EPINTFLAG_TRCPT0(1); // Clear pending interrupt
+		USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSSET = USB_DEVICE_EPSTATUSCLR_STALLRQ0(1);
+	}
+
+	if (USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTFLAG & USB_DEVICE_EPINTFLAG_TRCPT1_Msk) {
+		USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPINTFLAG = USB_DEVICE_EPINTFLAG_TRCPT1(1); // Clear pending interrupt
+		USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSSET = USB_DEVICE_EPSTATUSCLR_STALLRQ1(1);
+	}
+
+	PORT_REGS->GROUP[0].PORT_OUTCLR = 0x1 << 16u;
 }
 
 
@@ -193,11 +224,13 @@ void usb::init() {
 void usb::write(const uint8_t* data, uint8_t len) {
 	EPDESCTBL[1].DEVICE_DESC_BANK[1].USB_ADDR = (uint32_t)data;
 	EPDESCTBL[1].DEVICE_DESC_BANK[1].USB_PCKSIZE = len | USB_DEVICE_PCKSIZE_AUTO_ZLP(1);
+	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSCLR = USB_DEVICE_EPSTATUSCLR_STALLRQ1(1);
 	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSSET = USB_DEVICE_EPSTATUS_BK1RDY(1);
 }
 
 
 void usb::read(uint8_t* data, uint8_t len) {
 	memcpy(data, outBuf1, MIN(len, sizeof (outBuf1)));
-	USB_REGS->DEVICE.DEVICE_ENDPOINT[0].USB_EPSTATUSCLR = USB_DEVICE_EPSTATUS_BK0RDY(1);
+	USB_REGS->DEVICE.DEVICE_ENDPOINT[1].USB_EPSTATUSCLR = USB_DEVICE_EPSTATUS_STALLRQ(1)
+					| USB_DEVICE_EPSTATUS_BK0RDY(1);
 }
