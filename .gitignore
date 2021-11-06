@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/mplabx
-# Edit at https://www.toptal.com/developers/gitignore?templates=mplabx
+# Created by https://www.toptal.com/developers/gitignore/api/mplabx,netbeans
+# Edit at https://www.toptal.com/developers/gitignore?templates=mplabx,netbeans
 
 ### MPLabX ###
 #Ignore List for Microchips MPLabX IDE
@@ -29,4 +29,10 @@ nbproject/Makefile-*
 disassembly/
 *.map
 
-# End of https://www.toptal.com/developers/gitignore/api/mplabx
+### NetBeans ###
+**/nbproject/private/
+**/nbproject/Makefile-*.mk
+**/nbproject/Package-*.bash
+.nb-gradle/
+
+# End of https://www.toptal.com/developers/gitignore/api/mplabx,netbeans
