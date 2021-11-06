@@ -1,9 +1,8 @@
-#include <stddef.h>                     // Defines NULL
-#include <stdbool.h>                    // Defines true
-#include <stdlib.h>                     // Defines EXIT_FAILURE
-#include "device.h"                     // SYS function prototypes
+#include "device.h"
 
 #include "lib/usb.h"
+
+#define NVMTEMP ((uint32_t*)0x00806030)
 
 
 /* Clock distribution
@@ -26,8 +25,12 @@
  */
 
 
-void SysTick_Handler() {
-	int i;
+extern "C" {
+
+
+	void SysTick_Handler() {
+		// Nothing to do here yet
+	}
 }
 
 
@@ -66,11 +69,13 @@ int main() {
 	NVIC_SetPriority(USB_IRQn, 3);
 	NVIC_EnableIRQ(USB_IRQn);
 	NVIC_EnableIRQ(SysTick_IRQn);
-	
+
 	// SysTick config
-//	SysTick->CTRL = 0;
-//	SysTick->LOAD = 8000 - 1;
-//  SysTick->CTRL = SysTick_CTRL_TICKINT_Msk | SysTick_CTRL_CLKSOURCE_Msk;
+	SysTick->CTRL = 0;
+	SysTick->LOAD = 8000 - 1;
+	SysTick->CTRL = SysTick_CTRL_TICKINT_Msk
+					| SysTick_CTRL_CLKSOURCE_Msk
+					| SysTick_CTRL_ENABLE_Msk;
 
 	// SUPC config
 	SUPC_REGS->SUPC_VREF = SUPC_VREF_TSEN(1) // Enable temperature sensor
@@ -93,13 +98,22 @@ int main() {
 	// USB config
 	usb::init();
 
+	// Temperature calibration values
+	uint8_t tempR = NVMTEMP[0] & 0xff;
+	uint16_t adcR = (NVMTEMP[1] & 0xfff00) >> 8u;
+	uint8_t tempH = (NVMTEMP[0] & 0xff0000) >> 12u;
+	uint16_t adcH = (NVMTEMP[1] & 0xfff00000) >> 20u;
+
 	while (true) {
 		ADC_REGS->ADC_SWTRIG = ADC_SWTRIG_START(1); // Start conversion
-		while (!(ADC_REGS->ADC_INTFLAG & ADC_INTFLAG_RESRDY_Msk)); // Wait for ADC result
-		uint16_t val = ADC_REGS->ADC_RESULT;
-		usb::write((uint8_t*) & val, 2);
+		while (!(ADC_REGS->ADC_INTFLAG & ADC_INTFLAG_RESRDY_Msk)) {
+			__WFI();
+		} // Wait for ADC result
+		uint16_t temperature = tempR + ((ADC_REGS->ADC_RESULT - adcR) * (tempH - tempR) / 
+						(adcH - adcR));
+		usb::write((uint8_t*) & temperature, 2);
 		__WFI();
 	}
 
-	return (EXIT_FAILURE);
+	return 1;
 }
