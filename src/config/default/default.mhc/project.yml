@@ -27,13 +27,13 @@ files:
   security: NON_SECURE
   type: SOURCE
   userChecksum: 6513F2461B8F476B68CA73906086047F
-- generatedChecksum: null
+- generatedChecksum: F81A00E640818EDFB9E79C9BD241AEF4
   logicalPath: ''
   name: main.c
   physicalPath: ../..
   security: NON_SECURE
   type: SOURCE
-  userChecksum: null
+  userChecksum: F81A00E640818EDFB9E79C9BD241AEF4
 - generatedChecksum: A8C4DDF5C7DA5946D4CEEE5BCE205216
   logicalPath: config/default/peripheral/clock
   name: plib_clock.c
@@ -327,7 +327,7 @@ files:
   physicalPath: ''
   security: NON_SECURE
   type: HEADER
-  userChecksum: A85BC680A07148638C4FD2AD0DF14C04
+  userChecksum: F9B0ADE3E326FB993485E560102297A6
 - generatedChecksum: 5734D2D37425FCD9686FE090E8F9E744
   logicalPath: packs/ATSAML21E16B_DFP/component
   name: mclk.h

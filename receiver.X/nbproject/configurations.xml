@@ -183,6 +183,7 @@
       </logicalFolder>
       <logicalFolder name="f2" displayName="lib" projectFiles="true">
         <itemPath>../src/lib/usb.cpp</itemPath>
+        <itemPath>../src/lib/usb_descriptors.cpp</itemPath>
       </logicalFolder>
       <itemPath>../src/main.cpp</itemPath>
     </logicalFolder>

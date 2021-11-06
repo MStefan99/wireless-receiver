@@ -4,9 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/lib/usb.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/config/default/interrupts.c</file>
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/main.cpp</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/config/default/interrupts.h</file>
             <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/lib/usb.cpp</file>
-            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/ATSAML21E16B_DFP/component/usb.h</file>
+            <file>file:/D:/Programming/embedded/flight_computer/receiver/firmware/src/packs/CMSIS/CMSIS/Core/Include/core_cm0plus.h</file>
         </group>
     </open-files>
 </project-private>
