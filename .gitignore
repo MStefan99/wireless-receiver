@@ -36,3 +36,5 @@ disassembly/
 .nb-gradle/
 
 # End of https://www.toptal.com/developers/gitignore/api/mplabx,netbeans
+
+.generated_files
